@@ -12,6 +12,26 @@
 
 using namespace std;
 
+double Co3Rng::fSpectrumL(double theta){
+	//returns a random P between 1GeV and 100GeV taken from the 
+	// zenith angle dependend momentum distribution from 
+	// doi: 10.1016/j.nuclphysbps.2005.07.056.
+	// Here, the inverse of the function is computed and a random number 
+	// between 0 and 1 mapped to the interval [1, 100[ GeV
+	
+	theta = 180*theta/TMath::Pi(); // theta in degrees
+	double a = -0.8816/10000 /(1/theta  -0.1117/1000 * theta) - 0.1096 - 0.01966*TMath::Exp(-0.02040*theta);
+	double b = 0.4169/100 /(1/theta  -0.9891/10000 * theta) + 4.0395 - 4.3118*TMath::Exp(0.9235/1000*theta);
+
+	double gamma = sqrt(-TMath::Ln10()*a);
+	double offset = 0.5*(b  + 1/TMath::Ln10())/a;
+	double norm = TMath::Erf(gamma*(TMath::Log(100)+offset)) - TMath::Erf(gamma*offset);
+	
+	double r3 = rng->Uniform();
+	
+	return exp(TMath::ErfInverse(r3*norm+TMath::Erf(gamma*offset))/gamma-offset);
+}
+
 Bool_t CosmicsGenerator::Init(Float_t zmiddle, Bool_t largeMom){
 	//general
 	fRandomEngine = new Co3Rng();
@@ -33,12 +53,13 @@ Bool_t CosmicsGenerator::Init(Float_t zmiddle, Bool_t largeMom){
 	else cout<<"Simulation for low momentum"<<endl;
 	
 	// weights
+	double weight1;
 	if (!high) { // momentum range 1 GeV - 100 GeV
 		weight1 = 123*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
 	} 
 	else { // momentum range 100 GeV - 1000 GeV
-		double I = fRandomEngine->fspectrumH->Integral(100,1000);
-		double weight1 = 2*TMath::Pi()/3*I*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
+		double I = fRandomEngine->fSpectrumH->Integral(100,1000);
+		weight1 = 2*TMath::Pi()/3*I*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
 	}
 	double weight3 = 4.834154338; // MC average of nTry/nEvents 4.834154338 +- 0.000079500												
 	weight = weight1 / weight3;
@@ -85,7 +106,7 @@ Bool_t CosmicsGenerator::ReadEvent(FairPrimaryGenerator* cpg){
 			cpg->AddTrack(id,px,py,pz,x,y,z,-1,true,TMath::Sqrt(P*P+mass*mass),0,weight);  // -1 = Mother ID, true = tracking, SQRT(x) = Energy, 0 = t
 			hit = 1; nInside++;
 		}
-		weighttest += w;	nTest++;
+		weighttest += weight;	nTest++;
 	}while(!hit);
 	nEvent++;
 	if (!nEvent%10000){cout<<nEvent/10000<<"10k events have been simulated"<<endl;}

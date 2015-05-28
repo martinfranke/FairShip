@@ -29,7 +29,7 @@ followMuon  = False   # only transport muons for a fast muon only background est
 nuRadiography = False # misuse GenieGenerator for neutrino radiography and geometry timing test
 try:
         opts, args = getopt.getopt(sys.argv[1:], "D:FHPu:n:i:f:c:hqv:s:l:A:Y:i:m:co:",["Pythia6","Pythia8","Genie","MuDIS","Ntuple","MuonBack","FollowMuon",\
-                                   "Cosmics","CosmicsHigh","nEvents=", "display", "seed=", "firstEvent=", "phiRandom", "mass=", "couplings=", "coupling=", 
+                                   "Cosmics","HighCosmics","nEvents=", "display", "seed=", "firstEvent=", "phiRandom", "mass=", "couplings=", "coupling=", 
                                    "output=","NuRadio"])
 except getopt.GetoptError:
         # print help information and exit:
@@ -61,7 +61,7 @@ for o, a in opts:
         if o in ("--Cosmics"):
             simEngine = "Cosmics"
             Opt_high = 0
-        if o in ("--CosmicsHigh"):
+        if o in ("--HighCosmics"):
             simEngine = "Cosmics"
             Opt_high = 1
         if o in ("--MuDIS"):

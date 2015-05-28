@@ -34,25 +34,6 @@ class Co3Rng{
 	   TRandom3 *rng; //!
 };
 
-double Co3Rng::fSpectrumL(double theta){
-	//returns a random P between 1GeV and 100GeV taken from the 
-	// zenith angle dependend momentum distribution from 
-	// doi: 10.1016/j.nuclphysbps.2005.07.056.
-	// Here, the inverse of the function is computed and a random number 
-	// between 0 and 1 mapped to the interval [1, 100[ GeV
-	
-	theta = 180*theta/TMath::Pi(); // theta in degrees
-	double a = -0.8816/10000 /(1/theta  -0.1117/1000 * theta) - 0.1096 - 0.01966*TMath::Exp(-0.02040*theta);
-	double b = 0.4169/100 /(1/theta  -0.9891/10000 * theta) + 4.0395 - 4.3118*TMath::Exp(0.9235/1000*theta);
-
-	double gamma = sqrt(-TMath::Ln10()*a);
-	double offset = 0.5*(b  + 1/TMath::Ln10())/a;
-	double norm = TMath::Erf(gamma*(TMath::Log(100)+offset)) - TMath::Erf(gamma*offset);
-	
-	double r3 = rng->Uniform();
-	
-	return exp(TMath::ErfInverse(r3*norm+TMath::Erf(gamma*offset))/gamma-offset);
-}
 
 class CosmicsGenerator : public FairGenerator{
  public:
@@ -77,7 +58,7 @@ class CosmicsGenerator : public FairGenerator{
 	Co3Rng *fRandomEngine;//!
   
  protected:
-	double px,py,pz,x,y,z,weighttest, weight, z0, mass, yTop,xTop,zTop,xdist, zdist;
+	double P,px,py,pz,x,y,z,weighttest, weight, z0, mass, yTop,xTop,zTop,xdist, zdist;
 	int id,nInside,nEvent,nTest,EVENTS;//!
 	Bool_t high;
 		
