@@ -77,7 +77,7 @@ class CosmicsGenerator : public FairGenerator{
 	Co3Rng *fRandomEngine;//!
   
  protected:
-	double px,py,pz,x,y,z,w, weighttest, weight, z0, mass, yTop,xTop,zTop,xdist, zdist;
+	double px,py,pz,x,y,z,weighttest, weight, z0, mass, yTop,xTop,zTop,xdist, zdist;
 	int id,nInside,nEvent,nTest,EVENTS;//!
 	Bool_t high;
 		

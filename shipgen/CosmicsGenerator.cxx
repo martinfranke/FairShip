@@ -35,15 +35,13 @@ Bool_t CosmicsGenerator::Init(Float_t zmiddle, Bool_t largeMom){
 	// weights
 	if (!high) { // momentum range 1 GeV - 100 GeV
 		weight1 = 123*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
-		weight2 = TMath::Pi/3;
 	} 
-	else {
+	else { // momentum range 100 GeV - 1000 GeV
 		double I = fRandomEngine->fspectrumH->Integral(100,1000);
-		weight1 = 2*TMath::Pi()/3*I*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
-		weight2 = 900/I; // 1/(mean momentum weight), P_max-P_min/(3*0.3044/2pi)
+		double weight1 = 2*TMath::Pi()/3*I*xdist*zdist/EVENTS/10000; // expected #muons per spill/ #simulated events per spill: 123*30*90/500000
 	}
 	double weight3 = 4.834154338; // MC average of nTry/nEvents 4.834154338 +- 0.000079500												
-	weight = weight1 * weight2  / weight3;
+	weight = weight1 / weight3;
 
 	// running
 	y = 1900; //all muons start 19m over beam axis
@@ -76,17 +74,15 @@ Bool_t CosmicsGenerator::ReadEvent(FairPrimaryGenerator* cpg){
 			if (fRandomEngine->Uniform(0,1) < 1.0/2.278){id = 13;}
 			else{id = -13;}
 			
-			if (!high) { P = fRandomEngine->fSpectrumL(theta); w = weight;}
-			else { 
-				P = fRandomEngine->Uniform(100,1000);
-				w = weight * fRandomEngine->fspectrumH->Eval(P);
-			}
+			if (!high) P = fRandomEngine->fSpectrumL(theta);
+			else P = fRandomEngine->fSpectrumH->GetRandom();
+				
 			px = px*P;
 			py = py*P;
 			pz = pz*P;
 					
 			// transfer to Geant4
-			cpg->AddTrack(id,px,py,pz,x,y,z,-1,true,TMath::Sqrt(P*P+mass*mass),0,w);  // -1 = Mother ID, true = tracking, SQRT(x) = Energy, 0 = t
+			cpg->AddTrack(id,px,py,pz,x,y,z,-1,true,TMath::Sqrt(P*P+mass*mass),0,weight);  // -1 = Mother ID, true = tracking, SQRT(x) = Energy, 0 = t
 			hit = 1; nInside++;
 		}
 		weighttest += w;	nTest++;
